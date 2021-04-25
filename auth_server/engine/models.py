@@ -68,13 +68,13 @@ class User(AbstractUser):
 
 
 class AuthSecret(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     secret = models.TextField(default="")
     secret_size = models.IntegerField(default=156)
 
     def generateNewSecret(self):
         self.secret = ''.join(random.choice(
-            string.ascii_uppercase + string.digits) for _ in range(self.size))
+            string.ascii_uppercase + string.digits) for _ in range(self.secret_size))
 
     def retrieveSecret(self):
         return self.secret

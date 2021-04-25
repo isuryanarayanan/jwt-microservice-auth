@@ -1,11 +1,11 @@
 from django.urls import path
 from engine.views import (
     GenerateTokensView,
-    RefreshTokenView,
-    ValidateTokenView
+    ValidateTokenView,
+    RefreshTokenView
 )
 urlpatterns = [
-    path('token/', GenerateTokensView.as_view()),
-    path('token/refresh/', RefreshTokenView.as_view()),
-    path('token/validate/', ValidateTokenView.as_view()),
+    path('login/', GenerateTokensView.as_view()),
+    path('refresh/', RefreshTokenView.as_view()),
+    path('validate/', ValidateTokenView.as_view()),
 ]
