@@ -17,8 +17,12 @@ class GenerateTokensView(APIView):
 
     def post(self, request):
         loginSerializer = UserLoginSerializer(data=request.data)
-
-        self.response = loginSerializer.is_valid()
+        if loginSerializer.is_valid():
+            self.response = loginSerializer.data
+            self.response_code = 200
+        else:
+            self.response = loginSerializer.errors
+            self.response_code = 400
         return Response(self.response, self.response_code)
 
 

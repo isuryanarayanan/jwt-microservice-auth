@@ -1,5 +1,6 @@
 from django.db import models
-import random, string
+import random
+import string
 from django.contrib.auth.models import (
     AbstractUser,
 )
@@ -61,6 +62,16 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    secret = models.TextField(default="")
+    secret_size = models.IntegerField(default=156)
+
+    def generateNewSecret(self):
+        self.secret = ''.join(random.choice(
+            string.ascii_uppercase + string.digits) for _ in range(self.secret_size))
+
+    def retrieveSecret(self):
+        return self.secret
 
     class Meta:
         verbose_name = "user"
