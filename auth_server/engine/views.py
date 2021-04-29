@@ -1,9 +1,10 @@
 import json
+import jwt
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
-from engine.serializers import UserLoginSerializer
+from engine.serializers import UserLoginSerializer, RefreshTokenSerializer
 
 
 class GenerateTokensView(APIView):
@@ -18,7 +19,9 @@ class GenerateTokensView(APIView):
     def post(self, request):
         loginSerializer = UserLoginSerializer(data=request.data)
         if loginSerializer.is_valid():
-            self.response = loginSerializer.data
+            access_jwt = jwt.encode(
+                {"email": loginSerializer.data['email']}, loginSerializer.data['secret'], algorithm="HS256")
+            self.response = access_jwt
             self.response_code = 200
         else:
             self.response = loginSerializer.errors
@@ -35,7 +38,10 @@ class RefreshTokenView(APIView):
     response = None
     response_code = None
 
-    def get(self, request):
+    def post(self, request):
+        refreshTokenSerializer = RefreshTokenSerializer(data=request.data)
+        if refreshTokenSerializer.is_valid():
+            self.response = refreshTokenSerializer.data
         return Response(self.response, self.response_code)
 
 
