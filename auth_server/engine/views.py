@@ -45,14 +45,3 @@ class RefreshTokenView(APIView):
         return Response(self.response, self.response_code)
 
 
-class ValidateTokenView(APIView):
-    """
-    API for token validation
-    """
-    permission_classes = ()
-
-    response = None
-    response_code = None
-
-    def get(self, request):
-        return Response(self.response, self.response_code)
