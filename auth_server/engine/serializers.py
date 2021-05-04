@@ -1,47 +1,62 @@
-import base64
-import json
-from engine._jwt import _JWT
+""" Serializers for API views """
+
+# Module imports
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from engine.models import User, AuthSecret
+
+# Application imports
+from engine.jwt_handler import JWTHandler
 
 
 class UserLoginSerializer(serializers.Serializer):
+    """ Serializer for 'login/' endpoint """
+
+    # Incoming data from request
     email = serializers.CharField(max_length=250)
     password = serializers.CharField(max_length=128, write_only=True)
-    secret = serializers.CharField(max_length=250, read_only=True)
+
+    # response data generated
+    refresh = serializers.CharField(max_length=1000, read_only=True)
+    access = serializers.CharField(max_length=1000, read_only=True)
 
     def validate(self, data):
+        """ Method to validate the data received and to generate and output """
+
+        # Authenticating the user credentials
         user = authenticate(email=data.get('email', None),
                             password=data.get('password', None))
         if user is None:
             raise serializers.ValidationError(
                 'A user with this email and password is not found.'
             )
-
-        try:
+        else:
+            # On a successfull authentication the user secret is updated
             user.generateNewSecret()
             user.save()
-            jwt_token = user.retrieveSecret()
-        except:
-            print("error in generating user secret")
 
-        return {
-            'email': user.email,
-            'secret': jwt_token
-        }
+            # Getting new tokens based on the user secret
+            response_tokens = JWTHandler(user=user).get_tokens()
+            if response_tokens is None:
+                raise serializers.ValidationError(
+                    'Error generating tokens for this user'
+                )
+            else:
+                # Serializer data that is returned to the view
+                return {
+                    'email': user.email,
+                    'access': response_tokens['access'],
+                    'refresh': response_tokens['refresh']
+                }
+
 
 class RefreshTokenSerializer(serializers.Serializer):
-    access_token = serializers.CharField(max_length=1000)
-    payload = serializers.CharField(max_length=1000, read_only=True)
+    refresh = serializers.CharField(max_length=1000, read_only=True)
+    boolean = serializers.BooleanField(default=False, read_only=True)
 
     def validate(self, data):
-        access_token = data.get('access_token', None)
-        payload = _JWT(access_token).decode_payload()
-        
-        # {userId:1, userPermissions:[], validTill:2312t1}
+        token = data.get('refresh', None)
+        boolean = data.get('boolean', None)
 
-        return {
-            "access_token": access_token,
-            "payload": _JWT(access_token).decode_payload()
-        }
+        # Validating the token
+        boolean = JWTHandler(token=token).validate_token()
+        return boolean

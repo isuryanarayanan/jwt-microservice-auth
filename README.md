@@ -20,8 +20,24 @@ The initial set of tokens will be for the authentication server itself which wil
 		"access": //jwt access token for the authentication server,
 		"refresh": //jwt token for refreshing the access token
 	},
-	"service_name":{
-		"access": //jwt access token for the service2
-	}
+	["service_name":{
+		"access": //jwt access token for the service_name
+		"refresh": //jwt refresh token for the service_name
+	}]
 }
 ```
+
+The login credentials, in POST body
+
+```json
+{
+	"email": //user email,
+	"password": //user password
+}
+```
+
+### Flow of authentication/authorization process
+
+When the login route experience a request, the body is parsed and authenticated given the credentials are valid.
+After authentication the server then generate and retrieve the user's private secret token.
+Using this newly generated token since authentication, is used to encode a JWT token with payload contatinging the user details.

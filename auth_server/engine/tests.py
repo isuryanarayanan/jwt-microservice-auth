@@ -1,9 +1,14 @@
-from django.test import TestCase
-from engine.models import User
-from rest_framework.test import APIRequestFactory, APIClient
+""" Tests for API engine """
+
+# Native imports
 import json
 
-# Create your tests here.
+# Module imports
+from django.test import TestCase
+from rest_framework.test import APIRequestFactory, APIClient
+
+# Application imports
+from engine.models import User
 
 
 class EngineTests(TestCase):

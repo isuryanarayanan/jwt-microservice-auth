@@ -1,6 +1,11 @@
-from django.db import models
+""" Django database models """
+
+# Native imports
 import random
 import string
+
+# Module imports
+from django.db import models
 from django.contrib.auth.models import (
     AbstractUser,
 )
@@ -78,14 +83,4 @@ class User(AbstractUser):
         verbose_name_plural = "users"
 
 
-class AuthSecret(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    secret = models.TextField(default="")
-    secret_size = models.IntegerField(default=156)
 
-    def generateNewSecret(self):
-        self.secret = ''.join(random.choice(
-            string.ascii_uppercase + string.digits) for _ in range(self.secret_size))
-
-    def retrieveSecret(self):
-        return self.secret
