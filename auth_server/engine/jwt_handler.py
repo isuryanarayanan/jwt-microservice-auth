@@ -63,10 +63,9 @@ class JWTHandler():
 
     def validate_token(self):
         """ Method for validating token """
-        # is_valid = self.token is jwt.encode(
-                # json.loads(self.payload), self.secret, algorithm='HS256')
-        # return is_valid
-        return True
+        is_valid = self.token is jwt.encode(
+                json.loads(self.payload), self.secret, algorithm='HS256')
+        return is_valid
 
     def get_tokens(self):
         """ Returns a new set of JWT token encoded with users private secret """
