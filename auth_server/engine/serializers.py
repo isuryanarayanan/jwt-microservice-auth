@@ -35,7 +35,7 @@ class UserLoginSerializer(serializers.Serializer):
             user.save()
 
             # Getting new tokens based on the user secret
-            response_tokens = JWTHandler(user=user).get_tokens()
+            response_tokens = JWTHandler(params={'user': user}).get_tokens()
             if response_tokens is None:
                 raise serializers.ValidationError(
                     'Error generating tokens for this user'
@@ -50,13 +50,14 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class RefreshTokenSerializer(serializers.Serializer):
-    refresh = serializers.CharField(max_length=1000, read_only=True)
-    boolean = serializers.BooleanField(default=False, read_only=True)
+    refresh = serializers.CharField(max_length=2000, write_only=True)
+
+    validator_data = serializers.CharField(max_length=2000, read_only=True)
 
     def validate(self, data):
-        token = data.get('refresh', None)
-        boolean = data.get('boolean', None)
-
         # Validating the token
-        boolean = JWTHandler(token=token).validate_token()
-        return boolean
+        token = data.get('refresh', None)
+        validator_data = JWTHandler(params={'token': token}).validate_token()
+        return {
+            'validator_data': validator_data
+        }

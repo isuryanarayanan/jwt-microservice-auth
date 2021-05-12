@@ -21,18 +21,25 @@ class JWTHandler():
     secret = None
     payload = None
 
-    def __init__(self, token=None, user=None):
+    def __init__(self, params):
         """ Bootstrapping parameters """
-        if user:
-            self.user = user
-            self.__strap_user_secret()
-            self.access = None
-            self.refresh = None
-        if token:
-            print("poo")
-            self.token = token
-            self.__strap_token_payload()
-            self.__strap_user_from_token()
+        try:
+            user = params['user']
+            if user:
+                self.user = user
+                self.__strap_user_secret()
+                self.access = None
+                self.refresh = None
+        except KeyError:
+            pass
+        try:
+            token = params['token']
+            if token:
+                self.token = token
+                self.__strap_token_payload()
+                self.__strap_user_from_token()
+        except KeyError as e:
+            pass
 
     def __strap_token_payload(self):
         """ load the payload from token into state """
@@ -40,6 +47,7 @@ class JWTHandler():
             jwt_payload = self.token.split('.')[1]
             self.payload = json.loads(base64.b64decode(
                 jwt_payload + '=' * (-len(jwt_payload) % 4)).decode('ascii'))
+
         except Exception as exc:
             raise serializers.ValidationError(
                 "Token parsing failed to parse payload") from exc
@@ -61,11 +69,15 @@ class JWTHandler():
             raise serializers.ValidationError(
                 "Error loading user from token") from exc
 
-    def validate_token(self):
+    def __validate_token(self):
         """ Method for validating token """
-        is_valid = self.token is jwt.encode(
-                json.loads(self.payload), self.secret, algorithm='HS256')
-        return is_valid
+        try:
+            if jwt.encode(self.payload, self.secret, algorithm='HS256') == self.token:
+                return True
+            else:
+                return None
+        except Exception as exc:
+            raise serializers.ValidationError("Error validating token") from exc
 
     def get_tokens(self):
         """ Returns a new set of JWT token encoded with users private secret """
