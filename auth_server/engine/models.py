@@ -69,18 +69,30 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     secret = models.TextField(default="")
+    secret2 = models.TextField(default="")
     secret_size = models.IntegerField(default=156)
 
-    def generateNewSecret(self):
-        self.secret = ''.join(random.choice(
+    def __secret_generator(self):
+        """ Returns generated secret """
+        return ''.join(random.choice(
             string.ascii_uppercase + string.digits) for _ in range(self.secret_size))
 
-    def retrieveSecret(self):
+    def generate_new_secret(self):
+        """ Generates new access secret """
+        self.secret = self.__secret_generator()
+    
+    def generate_new_secret2(self):
+        """ Generates new refresh secret """
+        self.secret2 = self.__secret_generator()
+
+    def retrieve_secret(self):
+        """ returns access secret """
         return self.secret
+
+    def retrieve_secret2(self):
+        """ returns refresh secret """
+        return self.secret2
 
     class Meta:
         verbose_name = "user"
         verbose_name_plural = "users"
-
-
-

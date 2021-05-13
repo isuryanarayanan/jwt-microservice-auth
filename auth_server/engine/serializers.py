@@ -31,7 +31,8 @@ class UserLoginSerializer(serializers.Serializer):
             )
         else:
             # On a successfull authentication the user secret is updated
-            user.generateNewSecret()
+            user.generate_new_secret()
+            user.generate_new_secret2()
             user.save()
 
             # Getting new tokens based on the user secret
@@ -50,14 +51,18 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class RefreshTokenSerializer(serializers.Serializer):
+    """ Serializer for refreshing access token """
+
+    # Incoming information
     refresh = serializers.CharField(max_length=2000, write_only=True)
 
+    # Response data
     validator_data = serializers.CharField(max_length=2000, read_only=True)
 
     def validate(self, data):
-        # Validating the token
+        """ Validating incoming information and generating response """
         token = data.get('refresh', None)
-        validator_data = JWTHandler(params={'token': token}).validate_token()
+        validator_data = JWTHandler(params={'token': token}).refresh_tokens()
         return {
             'validator_data': validator_data
         }
