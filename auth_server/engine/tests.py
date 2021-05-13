@@ -16,6 +16,19 @@ class EngineTests(TestCase):
     factory = APIRequestFactory()
     client = APIClient()
     REQUESTS = {
+        'RefreshTokenView': {
+            'route': 'http://127.0.0.1:8000/tokens/refresh/',
+            'tests': [
+                {
+                    'body':{},
+                    'assert': 400
+                },
+                {
+                    'body':{'refresh':''},
+                    'assert': 400
+                }
+            ]
+        },
         'GenerateTokensView': {
             'route': 'http://127.0.0.1:8000/tokens/login/',
             'tests': [
@@ -34,6 +47,20 @@ class EngineTests(TestCase):
             ]
         }
     }
+    def test_RefreshTokensView(self):
+        """ Tests for token refresh view """
+
+        # Creating the default user
+        User.objects.create_user(email='testuser1@gmail.com', password='password')
+
+        # Executing all the requests
+        for x in self.REQUESTS['RefreshTokenView']['tests']:
+            request = self.client.post(
+                self.REQUESTS['RefreshTokenView']['route'],
+                json.dumps(x['body']),
+                content_type='application/json'
+            )
+            assert request.status_code == x['assert']
 
     def test_GenerateTokensView(self):
         """Tests for the token login view"""
